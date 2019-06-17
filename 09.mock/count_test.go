@@ -3,20 +3,31 @@ package main
 import (
 	"testing"
 	"bytes"
+	"reflect"
 )
 
-type SpySleeper struct {
-	calls int
+const (
+	sleep = "sleep"
+	write = "write"
+)
+
+type SpySleeperWithOrder struct {
+	calls []string
 }
 
-func (s *SpySleeper) Sleep() {
-	s.calls++
+func (s *SpySleeperWithOrder) Sleep() {
+	s.calls = append(s.calls, sleep)
+}
+
+func (s *SpySleeperWithOrder) Write(p []byte) (n int, err error) {
+	s.calls = append(s.calls, write)
+	return
 }
 
 func TestCount(t *testing.T) {
 	t.Run("count 3 to Go!", func(t *testing.T) {
 		buffer := &bytes.Buffer{}
-		sleeper := &SpySleeper{}
+		sleeper := &SpySleeperWithOrder{}
 		count(buffer, sleeper)
 
 		got := buffer.String()
@@ -32,16 +43,23 @@ Go!
 	})
 
 	t.Run("inspect sleep", func(t *testing.T) {
-		buffer := &bytes.Buffer{}
-		sleeper := &SpySleeper{}
+		sleeper := &SpySleeperWithOrder{}
 
-		count(buffer, sleeper)
+		count(sleeper, sleeper)
 
 		got := sleeper.calls
-		want := 3
+		want := []string{
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+			sleep,
+			write,
+		}
 
-		if got != want {
-			t.Errorf("got:[%d], expected:[%d]", got, want)
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got:[%v], expected:[%v]", got, want)
 		}
 	})
 }
