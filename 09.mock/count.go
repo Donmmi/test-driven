@@ -4,16 +4,33 @@ import (
 	"io"
 	"os"
 	"fmt"
+	"time"
 )
 
-func count(w io.Writer) {
-	for i := 3; i > 0; i-- {
+type Sleeper interface {
+	Sleep()
+}
+
+type ConfigurableSleeper struct {
+	duration time.Duration
+}
+
+func (s *ConfigurableSleeper) Sleep() {
+	time.Sleep(s.duration)
+}
+
+const countNum  = 3
+
+func count(w io.Writer, sleeper Sleeper) {
+	for i := countNum; i > 0; i-- {
 		fmt.Fprintln(w, i)
+		sleeper.Sleep()
 	}
 
 	fmt.Fprintln(w, "Go!")
 }
 
 func main() {
-	count(os.Stdout)
+	sleeper := &ConfigurableSleeper{time.Second}
+	count(os.Stdout, sleeper)
 }
