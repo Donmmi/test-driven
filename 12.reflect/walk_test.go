@@ -152,12 +152,16 @@ func TestWalk(t *testing.T) {
 	})
 }
 
-func assertContainValue(t *testing.T, m map[string]interface{}, want string) bool {
+func assertContainValue(t *testing.T, m map[string]interface{}, want string) {
 	t.Helper()
+	contains := false
 	for _, v := range m {
 		if want == v {
-			return true
+			contains = true
 		}
 	}
-	return false
+
+	if contains == false {
+		t.Errorf("%s not contains:[%v]", want, m)
+	}
 }
