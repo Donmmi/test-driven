@@ -102,6 +102,26 @@ func TestWalk(t *testing.T) {
 			},
 			[]string{"Chris", "USA", "Tom", "China"},
 		},
+		{
+			"array of struct",
+			[2]People{
+				{
+					"Chris",
+					Profile{
+						"USA",
+						29,
+					},
+				},
+				{
+					"Tom",
+					Profile{
+						"China",
+						30,
+					},
+				},
+			},
+			[]string{"Chris", "USA", "Tom", "China"},
+		},
 	}
 
 	for _, c := range cases {
@@ -115,4 +135,29 @@ func TestWalk(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("with map", func(t *testing.T) {
+		got = make([]string, 0)
+		x := map[string]interface{}{
+			"Name":"Chris",
+			"Age":29,
+			"Country":"USA",
+			"Hobbit":"swimming",
+		}
+		Walk(x, fn)
+
+		for i := 0; i < len(got); i++ {
+			assertContainValue(t, x, got[i])
+		}
+	})
+}
+
+func assertContainValue(t *testing.T, m map[string]interface{}, want string) bool {
+	t.Helper()
+	for _, v := range m {
+		if want == v {
+			return true
+		}
+	}
+	return false
 }
