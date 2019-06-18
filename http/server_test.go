@@ -42,6 +42,16 @@ func TestGetPlayerScore(t *testing.T) {
 		want := "10"
 		assertScore(t, got, want)
 	})
+
+	t.Run("get non existing player's score", func(t *testing.T) {
+		request := newGetPlayerScoreRequest("Apollo")
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, request)
+
+		got := response.Code
+		want := http.StatusNotFound
+		assertStatusCode(t, got, want)
+	})
 }
 
 func newGetPlayerScoreRequest(player string) *http.Request {
@@ -53,5 +63,12 @@ func assertScore(t *testing.T, got, want string) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got:[%s], expected:[%s]", got, want)
+	}
+}
+
+func assertStatusCode(t *testing.T, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got:[%d], expected:[%d]", got, want)
 	}
 }

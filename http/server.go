@@ -18,5 +18,10 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	score := p.store.getPlayerScore(player)
 
+	if score == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	fmt.Fprint(w, score)
 }
