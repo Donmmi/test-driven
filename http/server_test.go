@@ -61,7 +61,7 @@ func TestGetPlayerScore(t *testing.T) {
 
 	t.Run("record Pepper's score", func(t *testing.T) {
 		player := "Pepper"
-		request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", player), nil)
+		request := newRecordWinnerRequest(player)
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, request)
 
@@ -74,6 +74,11 @@ func TestGetPlayerScore(t *testing.T) {
 
 func newGetPlayerScoreRequest(player string) *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", player), nil)
+	return req
+}
+
+func newRecordWinnerRequest(winner string) *http.Request {
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", winner), nil)
 	return req
 }
 
