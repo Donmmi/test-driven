@@ -58,7 +58,11 @@ func TestGetPlayerScore(t *testing.T) {
 		want := http.StatusNotFound
 		assertStatusCode(t, got, want)
 	})
+}
 
+func TestRecord(t *testing.T) {
+	store := &StubPlayerStore{}
+	server := PlayerServer{store:store}
 	t.Run("record Pepper's score", func(t *testing.T) {
 		player := "Pepper"
 		request := newRecordWinnerRequest(player)

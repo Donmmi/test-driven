@@ -14,8 +14,12 @@ func (i *InMemoryPlayerStore) record(name string) {
 	i.store[name]++
 }
 
+func NewInMemoryPlayerStore() *InMemoryPlayerStore {
+	return &InMemoryPlayerStore{map[string]int{}}
+}
+
 func main() {
-	store := &InMemoryPlayerStore{map[string]int{}}
+	store := NewInMemoryPlayerStore()
 	server := &PlayerServer{store:store}
 
 	http.ListenAndServe(":5555", server)
