@@ -3,16 +3,23 @@ package main
 import (
 	"net/http"
 	"fmt"
+	"encoding/json"
 )
 
 type PlayerStore interface {
 	getPlayerScore(name string) int
 	record(name string)
+	getLeague() []Player
 }
 
 type PlayerServer struct {
 	store PlayerStore
 	http.Handler
+}
+
+type Player struct {
+	Name string
+	Wins int
 }
 
 func NewPlayerServer(store PlayerStore) *PlayerServer {
@@ -29,6 +36,10 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 }
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	err := json.NewEncoder(w).Encode(p.store.getLeague())
+	if err != nil {
+		panic(err)
+	}
 	w.WriteHeader(http.StatusOK)
 }
 
