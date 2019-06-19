@@ -9,10 +9,15 @@ import (
 
 type StubPlayerStore struct {
 	score map[string]int
+	calls []string
 }
 
 func (s *StubPlayerStore) getPlayerScore(name string) int {
 	return s.score[name]
+}
+
+func (s *StubPlayerStore) record(name string) {
+	s.calls = append(s.calls, name)
 }
 
 func TestGetPlayerScore(t *testing.T) {
@@ -21,6 +26,7 @@ func TestGetPlayerScore(t *testing.T) {
 			"Pepper":20,
 			"Floyd":10,
 		},
+		nil,
 	}
 	server := &PlayerServer{store:store}
 	t.Run("get Pepper's score", func(t *testing.T) {
@@ -52,6 +58,18 @@ func TestGetPlayerScore(t *testing.T) {
 		want := http.StatusNotFound
 		assertStatusCode(t, got, want)
 	})
+
+	t.Run("record Pepper's score", func(t *testing.T) {
+		player := "Pepper"
+		request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", player), nil)
+		response := httptest.NewRecorder()
+		server.ServeHTTP(response, request)
+
+		got := response.Code
+		want := http.StatusAccepted
+		assertStatusCode(t, got, want)
+		assertWinner(t, store, player)
+	})
 }
 
 func newGetPlayerScoreRequest(player string) *http.Request {
@@ -70,5 +88,16 @@ func assertStatusCode(t *testing.T, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got:[%d], expected:[%d]", got, want)
+	}
+}
+
+func assertWinner(t *testing.T, store *StubPlayerStore, winner string) {
+	t.Helper()
+	if len(store.calls) != 1 {
+		t.Errorf("got:[%d], expected:[%d]", len(store.calls), 1)
+	}
+
+	if store.calls[0] != winner {
+		t.Errorf("got:[%s], expected:[%s]", store.calls[0], winner)
 	}
 }
