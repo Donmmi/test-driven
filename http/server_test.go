@@ -1,18 +1,18 @@
 package main
 
 import (
-	"testing"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
-	"encoding/json"
 	"reflect"
-	"io"
+	"testing"
 )
 
 type StubPlayerStore struct {
-	score map[string]int
-	calls []string
+	score  map[string]int
+	calls  []string
 	league []Player
 }
 
@@ -31,8 +31,8 @@ func (s *StubPlayerStore) getLeague() []Player {
 func TestGetPlayerScore(t *testing.T) {
 	store := &StubPlayerStore{
 		map[string]int{
-			"Pepper":20,
-			"Floyd":10,
+			"Pepper": 20,
+			"Floyd":  10,
 		},
 		nil,
 		nil,
@@ -82,18 +82,24 @@ func TestRecord(t *testing.T) {
 		want := http.StatusAccepted
 		assertStatusCode(t, got, want)
 		assertWinner(t, store, player)
+
+		contentTypeGot := response.Header().Get("content-type")
+		contentTypeWant := ContentTypeJson
+		if contentTypeGot != contentTypeWant {
+			t.Errorf("got:[%s], expected:[%s]", contentTypeGot, contentTypeWant)
+		}
 	})
 }
 
 func TestLeague(t *testing.T) {
 	wantedLeague := []Player{
-		{"Pepper",20},
-		{"Floyd",10},
+		{"Pepper", 20},
+		{"Floyd", 10},
 	}
 	store := &StubPlayerStore{
 		map[string]int{
-			"Pepper":20,
-			"Floyd":10,
+			"Pepper": 20,
+			"Floyd":  10,
 		},
 		nil,
 		wantedLeague,

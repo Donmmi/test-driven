@@ -12,6 +12,8 @@ type PlayerStore interface {
 	getLeague() []Player
 }
 
+const ContentTypeJson  = "application/json"
+
 type PlayerServer struct {
 	store PlayerStore
 	http.Handler
@@ -66,5 +68,6 @@ func (p *PlayerServer) showPlayerScore(w http.ResponseWriter, player string) {
 
 func (p *PlayerServer) processPlayerScore(w http.ResponseWriter, player string) {
 	p.store.record(player)
+	w.Header().Set("content-type", ContentTypeJson)
 	w.WriteHeader(http.StatusAccepted)
 }
