@@ -10,17 +10,41 @@ type FileSystemPlayerStore struct {
 	league league
 }
 
-func NewFileSystemPlayerStore(database *os.File) (*FileSystemPlayerStore, error) {
-	_, err := database.Seek(0, 0)
+func initFileSystemPlayerStore(file *os.File) error {
+	_, err := file.Seek(0, 0)
+	if err != nil {
+		return err
+	}
+
+	info, err := os.Stat(file.Name())
+	if err != nil {
+		return err
+	}
+	if info.Size() == 0 {
+		_, err := file.Write([]byte(`[]`))
+		if err != nil {
+			return err
+		}
+		_, err = file.Seek(0, 0)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
+	err := initFileSystemPlayerStore(file)
 	if err != nil {
 		return nil, err
 	}
-	league, err := getLeague(database)
+
+	league, err := getLeague(file)
 	if err != nil {
 		return nil, err
 	}
 	f := &FileSystemPlayerStore{
-		database:json.NewEncoder(&tape{database}),
+		database:json.NewEncoder(&tape{file}),
 		league:league,
 	}
 	return f, nil

@@ -7,7 +7,12 @@ import (
 )
 
 func TestRecordAndRetrievingThem(t *testing.T) {
-	store := NewInMemoryPlayerStore()
+	//store := NewInMemoryPlayerStore()
+	tmpFile, clean := createTmpFile(t, ``)
+	defer clean()
+	store, err := NewFileSystemPlayerStore(tmpFile)
+	assertNoError(t, err)
+
 	server := NewPlayerServer(store)
 
 	// record 3 times
