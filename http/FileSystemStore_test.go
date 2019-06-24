@@ -2,12 +2,44 @@ package main
 
 import (
 	"testing"
-	"strings"
+	"io"
+	"io/ioutil"
+	"os"
 )
+
+func createTmpFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
+	t.Helper()
+	tmpFile, err := ioutil.TempFile("", "db")
+	if err != nil {
+		panic(err)
+	}
+	_, err = tmpFile.Write([]byte(initialData))
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = tmpFile.Seek(0 ,0)
+	if err != nil {
+		panic(err)
+	}
+
+	clean := func() {
+		err = tmpFile.Close()
+		if err != nil {
+			panic(err)
+		}
+		err = os.Remove(tmpFile.Name())
+		if err != nil {
+			panic(err)
+		}
+	}
+	return tmpFile, clean
+}
 
 func TestFileSystemPlayerStore(t *testing.T) {
 	t.Run("test get league", func(t *testing.T) {
-		database := strings.NewReader(`[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+		defer clean()
 		store := FileSystemPlayerStore{database}
 
 		got := store.GetLeague()
@@ -21,11 +53,33 @@ func TestFileSystemPlayerStore(t *testing.T) {
 	})
 
 	t.Run("test get player score", func(t *testing.T) {
-		database := strings.NewReader(`[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+		defer clean()
 		store := FileSystemPlayerStore{database}
 
 		got := store.GetPlayerScore("Pepper")
 		want := 20
+		assertPlayerScore(t, got, want)
+	})
+
+	t.Run("get non existing player score", func(t *testing.T) {
+		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+		defer clean()
+		store := FileSystemPlayerStore{database}
+
+		got := store.GetPlayerScore("Apollo")
+		want := 0
+		assertPlayerScore(t, got, want)
+	})
+
+	t.Run("record player score", func(t *testing.T) {
+		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+		defer clean()
+		store := FileSystemPlayerStore{database}
+
+		store.Record("Pepper")
+		got := store.GetPlayerScore("Pepper")
+		want := 21
 		assertPlayerScore(t, got, want)
 	})
 }
