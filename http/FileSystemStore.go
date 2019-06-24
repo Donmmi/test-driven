@@ -7,19 +7,23 @@ import (
 
 type FileSystemPlayerStore struct {
 	database io.ReadWriteSeeker
+	league []Player
+}
+
+func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+	league, err := getLeague(database)
+	if err != nil {
+		panic(err)
+	}
+	f := &FileSystemPlayerStore{
+		database:database,
+		league:league,
+	}
+	return f
 }
 
 func (f *FileSystemPlayerStore) getLeague() []Player {
-	_, err := f.database.Seek(0, 0)
-	if err != nil {
-		panic(err)
-	}
-
-	league, err := getLeague(f.database)
-	if err != nil {
-		panic(err)
-	}
-	return league
+	return f.league
 }
 
 func (f *FileSystemPlayerStore) getPlayerScore(name string) int {
