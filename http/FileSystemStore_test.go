@@ -81,6 +81,17 @@ func TestFileSystemPlayerStore(t *testing.T) {
 		want := 21
 		assertPlayerScore(t, got, want)
 	})
+
+	t.Run("record non existing score", func(t *testing.T) {
+		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+		defer clean()
+		store := NewFileSystemPlayerStore(database)
+
+		store.record("Apollo")
+		got := store.getPlayerScore("Apollo")
+		want := 1
+		assertPlayerScore(t, got, want)
+	})
 }
 
 func assertPlayerScore(t *testing.T, got, want int) {

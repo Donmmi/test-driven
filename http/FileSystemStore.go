@@ -26,14 +26,12 @@ func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
 	return f
 }
 
-func (f *FileSystemPlayerStore) getLeague() league {
+func (f *FileSystemPlayerStore) getLeague() []Player {
 	return f.league
 }
 
 func (f *FileSystemPlayerStore) getPlayerScore(name string) int {
-	league := f.getLeague()
-
-	player := league.find(name)
+	player := f.league.find(name)
 	if player != nil {
 		return player.Wins
 	}
@@ -42,14 +40,14 @@ func (f *FileSystemPlayerStore) getPlayerScore(name string) int {
 }
 
 func (f *FileSystemPlayerStore) record(name string) {
-	league := f.getLeague()
-
-	player := league.find(name)
+	player := f.league.find(name)
 	if player != nil {
 		player.Wins++
+	} else {
+		f.league = append(f.league, Player{name, 1})
 	}
 
-	err := f.database.Encode(f.database)
+	err := f.database.Encode(f.league)
 	if err != nil {
 		panic(err)
 	}
