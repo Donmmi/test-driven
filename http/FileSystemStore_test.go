@@ -2,12 +2,11 @@ package main
 
 import (
 	"testing"
-	"io"
 	"io/ioutil"
 	"os"
 )
 
-func createTmpFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
+func createTmpFile(t *testing.T, initialData string) (*os.File, func()) {
 	t.Helper()
 	tmpFile, err := ioutil.TempFile("", "db")
 	if err != nil {

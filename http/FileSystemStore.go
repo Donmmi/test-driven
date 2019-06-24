@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io"
 	"encoding/json"
+	"os"
 )
 
 type FileSystemPlayerStore struct {
@@ -10,7 +10,7 @@ type FileSystemPlayerStore struct {
 	league league
 }
 
-func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
 	_, err := database.Seek(0, 0)
 	if err != nil {
 		panic(err)

@@ -1,12 +1,18 @@
 package main
 
-import "io"
+import (
+	"os"
+)
 
 type tape struct {
-	file io.ReadWriteSeeker
+	file *os.File
 }
 
 func (t *tape) Write(p []byte) (n int, err error) {
+	err = t.file.Truncate(0)
+	if err != nil {
+		return 0, err
+	}
 	_, err = t.file.Seek(0, 0)
 	if err != nil {
 		return 0, err
