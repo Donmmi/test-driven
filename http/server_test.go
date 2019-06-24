@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -120,12 +119,11 @@ func TestLeague(t *testing.T) {
 }
 
 func getLeagueFromResponse(t *testing.T, body io.Reader) []Player {
-	var players []Player
-	err := json.NewDecoder(body).Decode(&players)
+	league, err := getLeague(body)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
-	return players
+	return league
 }
 
 func newGetPlayerScoreRequest(player string) *http.Request {

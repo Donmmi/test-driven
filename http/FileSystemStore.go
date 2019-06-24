@@ -14,8 +14,8 @@ func (f *FileSystemPlayerStore) getLeague() []Player {
 	if err != nil {
 		panic(err)
 	}
-	var league []Player
-	err = json.NewDecoder(f.database).Decode(&league)
+
+	league, err := getLeague(f.database)
 	if err != nil {
 		panic(err)
 	}
