@@ -39,7 +39,8 @@ func TestFileSystemPlayerStore(t *testing.T) {
 	t.Run("test get league", func(t *testing.T) {
 		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store := NewFileSystemPlayerStore(database)
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 
 		got := store.getLeague()
 		want := []Player{{"Pepper",20},{"Floyd",30}}
@@ -54,7 +55,8 @@ func TestFileSystemPlayerStore(t *testing.T) {
 	t.Run("test get player score", func(t *testing.T) {
 		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store := NewFileSystemPlayerStore(database)
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 
 		got := store.getPlayerScore("Pepper")
 		want := 20
@@ -64,7 +66,8 @@ func TestFileSystemPlayerStore(t *testing.T) {
 	t.Run("get non existing player score", func(t *testing.T) {
 		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store := NewFileSystemPlayerStore(database)
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 
 		got := store.getPlayerScore("Apollo")
 		want := 0
@@ -74,7 +77,8 @@ func TestFileSystemPlayerStore(t *testing.T) {
 	t.Run("record player score", func(t *testing.T) {
 		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store := NewFileSystemPlayerStore(database)
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 
 		store.record("Pepper")
 		got := store.getPlayerScore("Pepper")
@@ -85,7 +89,8 @@ func TestFileSystemPlayerStore(t *testing.T) {
 	t.Run("record non existing score", func(t *testing.T) {
 		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store := NewFileSystemPlayerStore(database)
+		store, err := NewFileSystemPlayerStore(database)
+		assertNoError(t, err)
 
 		store.record("Apollo")
 		got := store.getPlayerScore("Apollo")
@@ -98,5 +103,12 @@ func assertPlayerScore(t *testing.T, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("got:[%d], expected:[%d]", got, want)
+	}
+}
+
+func assertNoError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatal("unexpected err:", err)
 	}
 }

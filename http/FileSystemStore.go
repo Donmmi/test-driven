@@ -10,20 +10,20 @@ type FileSystemPlayerStore struct {
 	league league
 }
 
-func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
+func NewFileSystemPlayerStore(database *os.File) (*FileSystemPlayerStore, error) {
 	_, err := database.Seek(0, 0)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	league, err := getLeague(database)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	f := &FileSystemPlayerStore{
 		database:json.NewEncoder(&tape{database}),
 		league:league,
 	}
-	return f
+	return f, nil
 }
 
 func (f *FileSystemPlayerStore) getLeague() []Player {
