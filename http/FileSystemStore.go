@@ -6,17 +6,21 @@ import (
 )
 
 type FileSystemPlayerStore struct {
-	database io.ReadWriteSeeker
-	league []Player
+	database io.Writer
+	league league
 }
 
 func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+	_, err := database.Seek(0, 0)
+	if err != nil {
+		panic(err)
+	}
 	league, err := getLeague(database)
 	if err != nil {
 		panic(err)
 	}
 	f := &FileSystemPlayerStore{
-		database:database,
+		database:&tape{database},
 		league:league,
 	}
 	return f
@@ -45,14 +49,7 @@ func (f *FileSystemPlayerStore) record(name string) {
 		player.Wins++
 	}
 
-	// 不做seek会导致从文件尾继续写入，需要从文件头开始覆盖写
-	_, err := f.database.Seek(0, 0)
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.NewEncoder(f.database).Encode(&league)
-
+	err := json.NewEncoder(f.database).Encode(&league)
 	if err != nil {
 		panic(err)
 	}
