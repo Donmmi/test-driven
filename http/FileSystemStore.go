@@ -6,7 +6,7 @@ import (
 )
 
 type FileSystemPlayerStore struct {
-	database io.Writer
+	database *json.Encoder
 	league league
 }
 
@@ -20,7 +20,7 @@ func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStor
 		panic(err)
 	}
 	f := &FileSystemPlayerStore{
-		database:&tape{database},
+		database:json.NewEncoder(&tape{database}),
 		league:league,
 	}
 	return f
@@ -49,7 +49,7 @@ func (f *FileSystemPlayerStore) record(name string) {
 		player.Wins++
 	}
 
-	err := json.NewEncoder(f.database).Encode(&league)
+	err := f.database.Encode(f.database)
 	if err != nil {
 		panic(err)
 	}
