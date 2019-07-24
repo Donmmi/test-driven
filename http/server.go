@@ -7,9 +7,9 @@ import (
 )
 
 type PlayerStore interface {
-	getPlayerScore(name string) int
-	record(name string)
-	getLeague() []Player
+	GetPlayerScore(name string) int
+	Record(name string)
+	GetLeague() []Player
 }
 
 const ContentTypeJson  = "application/json"
@@ -38,7 +38,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 }
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-	err := json.NewEncoder(w).Encode(p.store.getLeague())
+	err := json.NewEncoder(w).Encode(p.store.GetLeague())
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +55,7 @@ func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) showPlayerScore(w http.ResponseWriter, player string) {
-	score := p.store.getPlayerScore(player)
+	score := p.store.GetPlayerScore(player)
 
 	if score == 0 {
 		w.WriteHeader(http.StatusNotFound)
@@ -66,7 +66,7 @@ func (p *PlayerServer) showPlayerScore(w http.ResponseWriter, player string) {
 }
 
 func (p *PlayerServer) processPlayerScore(w http.ResponseWriter, player string) {
-	p.store.record(player)
+	p.store.Record(player)
 	w.Header().Set("content-type", ContentTypeJson)
 	w.WriteHeader(http.StatusAccepted)
 }

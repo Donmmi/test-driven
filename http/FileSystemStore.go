@@ -11,6 +11,20 @@ type FileSystemPlayerStore struct {
 	league league
 }
 
+func NewFileSystemPlayerStoreFromFile(fileName string) (*FileSystemPlayerStore, error) {
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return nil, err
+	}
+
+	store, err := NewFileSystemPlayerStore(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return store, nil
+}
+
 func initFileSystemPlayerStore(file *os.File) error {
 	_, err := file.Seek(0, 0)
 	if err != nil {
@@ -51,14 +65,14 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 	return f, nil
 }
 
-func (f *FileSystemPlayerStore) getLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() []Player {
 	sort.Slice(f.league, func(i, j int) bool {
 		return f.league[i].Wins > f.league[j].Wins
 	})
 	return f.league
 }
 
-func (f *FileSystemPlayerStore) getPlayerScore(name string) int {
+func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 	player := f.league.find(name)
 	if player != nil {
 		return player.Wins
@@ -67,7 +81,7 @@ func (f *FileSystemPlayerStore) getPlayerScore(name string) int {
 	return 0
 }
 
-func (f *FileSystemPlayerStore) record(name string) {
+func (f *FileSystemPlayerStore) Record(name string) {
 	player := f.league.find(name)
 	if player != nil {
 		player.Wins++

@@ -1,114 +1,70 @@
-package poker
+package poker_test
 
 import (
 	"testing"
-	"io/ioutil"
-	"os"
+	"donmmi/test-driven/http"
 )
 
-func createTmpFile(t *testing.T, initialData string) (*os.File, func()) {
-	t.Helper()
-	tmpFile, err := ioutil.TempFile("", "db")
-	if err != nil {
-		panic(err)
-	}
-	_, err = tmpFile.Write([]byte(initialData))
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = tmpFile.Seek(0 ,0)
-	if err != nil {
-		panic(err)
-	}
-
-	clean := func() {
-		err = tmpFile.Close()
-		if err != nil {
-			panic(err)
-		}
-		err = os.Remove(tmpFile.Name())
-		if err != nil {
-			panic(err)
-		}
-	}
-	return tmpFile, clean
-}
-
 func TestFileSystemPlayerStore(t *testing.T) {
-	t.Run("get sorted league", func(t *testing.T) {
-		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+	t.Run("get sorted League", func(t *testing.T) {
+		database, clean := poker.CreateTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store, err := NewFileSystemPlayerStore(database)
-		assertNoError(t, err)
+		store, err := poker.NewFileSystemPlayerStore(database)
+		poker.AssertNoError(t, err)
 
-		got := store.getLeague()
-		want := []Player{{"Floyd",30}, {"Pepper",20}}
+		got := store.GetLeague()
+		want := []poker.Player{{"Floyd",30}, {"Pepper",20}}
 
-		assertLeague(t, got, want)
+		poker.AssertLeague(t, got, want)
 
 		// read again
-		got = store.getLeague()
-		assertLeague(t, got, want)
+		got = store.GetLeague()
+		poker.AssertLeague(t, got, want)
 	})
 
-	t.Run("test get player score", func(t *testing.T) {
-		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+	t.Run("test get player Score", func(t *testing.T) {
+		database, clean := poker.CreateTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store, err := NewFileSystemPlayerStore(database)
-		assertNoError(t, err)
+		store, err := poker.NewFileSystemPlayerStore(database)
+		poker.AssertNoError(t, err)
 
-		got := store.getPlayerScore("Pepper")
+		got := store.GetPlayerScore("Pepper")
 		want := 20
-		assertPlayerScore(t, got, want)
+		poker.AssertPlayerScore(t, got, want)
 	})
 
-	t.Run("get non existing player score", func(t *testing.T) {
-		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+	t.Run("get non existing player Score", func(t *testing.T) {
+		database, clean := poker.CreateTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store, err := NewFileSystemPlayerStore(database)
-		assertNoError(t, err)
+		store, err := poker.NewFileSystemPlayerStore(database)
+		poker.AssertNoError(t, err)
 
-		got := store.getPlayerScore("Apollo")
+		got := store.GetPlayerScore("Apollo")
 		want := 0
-		assertPlayerScore(t, got, want)
+		poker.AssertPlayerScore(t, got, want)
 	})
 
-	t.Run("record player score", func(t *testing.T) {
-		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+	t.Run("Record player Score", func(t *testing.T) {
+		database, clean := poker.CreateTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store, err := NewFileSystemPlayerStore(database)
-		assertNoError(t, err)
+		store, err := poker.NewFileSystemPlayerStore(database)
+		poker.AssertNoError(t, err)
 
-		store.record("Pepper")
-		got := store.getPlayerScore("Pepper")
+		store.Record("Pepper")
+		got := store.GetPlayerScore("Pepper")
 		want := 21
-		assertPlayerScore(t, got, want)
+		poker.AssertPlayerScore(t, got, want)
 	})
 
-	t.Run("record non existing score", func(t *testing.T) {
-		database, clean := createTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
+	t.Run("Record non existing Score", func(t *testing.T) {
+		database, clean := poker.CreateTmpFile(t, `[{"Name":"Pepper","Wins":20},{"Name":"Floyd", "Wins":30}]`)
 		defer clean()
-		store, err := NewFileSystemPlayerStore(database)
-		assertNoError(t, err)
+		store, err := poker.NewFileSystemPlayerStore(database)
+		poker.AssertNoError(t, err)
 
-		store.record("Apollo")
-		got := store.getPlayerScore("Apollo")
+		store.Record("Apollo")
+		got := store.GetPlayerScore("Apollo")
 		want := 1
-		assertPlayerScore(t, got, want)
+		poker.AssertPlayerScore(t, got, want)
 	})
-}
-
-func assertPlayerScore(t *testing.T, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("got:[%d], expected:[%d]", got, want)
-	}
-}
-
-func assertNoError(t *testing.T, err error) {
-	t.Helper()
-	if err != nil {
-		t.Fatal("unexpected err:", err)
-	}
 }

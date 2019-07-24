@@ -1,31 +1,32 @@
-package poker
+package poker_test
 
 import (
 	"testing"
 	"net/http/httptest"
 	"net/http"
+	"donmmi/test-driven/http"
 )
 
 func TestRecordAndRetrievingThem(t *testing.T) {
 	//store := NewInMemoryPlayerStore()
-	tmpFile, clean := createTmpFile(t, ``)
+	tmpFile, clean := poker.CreateTmpFile(t, ``)
 	defer clean()
-	store, err := NewFileSystemPlayerStore(tmpFile)
-	assertNoError(t, err)
+	store, err := poker.NewFileSystemPlayerStore(tmpFile)
+	poker.AssertNoError(t, err)
 
-	server := NewPlayerServer(store)
+	server := poker.NewPlayerServer(store)
 
-	// record 3 times
+	// Record 3 times
 	player := "Pepper"
-	server.ServeHTTP(httptest.NewRecorder(), newRecordWinnerRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newRecordWinnerRequest(player))
-	server.ServeHTTP(httptest.NewRecorder(), newRecordWinnerRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), poker.NewRecordWinnerRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), poker.NewRecordWinnerRequest(player))
+	server.ServeHTTP(httptest.NewRecorder(), poker.NewRecordWinnerRequest(player))
 
-	t.Run("get player score", func(t *testing.T) {
+	t.Run("get player Score", func(t *testing.T) {
 		// get results
 		response := httptest.NewRecorder()
-		server.ServeHTTP(response, newGetPlayerScoreRequest(player))
-		assertStatusCode(t, response.Code, http.StatusOK)
+		server.ServeHTTP(response, poker.NewGetPlayerScoreRequest(player))
+		poker.AssertStatusCode(t, response.Code, http.StatusOK)
 
 		got := response.Body.String()
 		want := "3"
@@ -34,16 +35,16 @@ func TestRecordAndRetrievingThem(t *testing.T) {
 		}
 	})
 
-	t.Run("get league", func(t *testing.T) {
+	t.Run("get League", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		server.ServeHTTP(response, newGetLeagueRequest())
+		server.ServeHTTP(response, poker.NewGetLeagueRequest())
 
-		assertStatusCode(t, response.Code, http.StatusOK)
+		poker.AssertStatusCode(t, response.Code, http.StatusOK)
 
-		gotLeague := getLeagueFromResponse(t, response.Body)
-		wantedLeague := []Player{
+		gotLeague := poker.GetLeagueFromResponse(t, response.Body)
+		wantedLeague := []poker.Player{
 			{"Pepper", 3},
 		}
-		assertLeague(t, gotLeague, wantedLeague)
+		poker.AssertLeague(t, gotLeague, wantedLeague)
 	})
 }
