@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"donmmi/test-driven/http"
 )
 
 const dbFileName  = "game.json"
@@ -13,12 +14,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	store, err := NewFileSystemPlayerStore(file)
+	store, err := poker.NewFileSystemPlayerStore(file)
 	if err != nil {
 		panic(err)
 	}
 
-	server := NewPlayerServer(store)
+	server := poker.NewPlayerServer(store)
 
 	http.ListenAndServe(":5555", server)
 }
