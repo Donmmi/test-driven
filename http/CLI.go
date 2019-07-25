@@ -3,6 +3,7 @@ package poker
 import (
 	"bufio"
 	"strings"
+	"io"
 )
 
 type CLI struct {
@@ -10,8 +11,8 @@ type CLI struct {
 	in *bufio.Scanner
 }
 
-func NewCLI(store PlayerStore, in *bufio.Scanner) *CLI {
-	return &CLI{store, in}
+func NewCLI(store PlayerStore, in io.Reader) *CLI {
+	return &CLI{store, bufio.NewScanner(in)}
 }
 
 func (c *CLI) PlayPoker() {

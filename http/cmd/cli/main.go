@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"donmmi/test-driven/http"
-	"bufio"
 	"log"
 )
 
@@ -18,6 +17,6 @@ func main() {
 		log.Fatal("new store from file err:", err.Error())
 	}
 
-	cli := poker.NewCLI(store, bufio.NewScanner(os.Stdin))
+	cli := poker.NewCLI(store, os.Stdin)
 	cli.PlayPoker()
 }

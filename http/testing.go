@@ -47,7 +47,7 @@ func NewRecordWinnerRequest(winner string) *http.Request {
 }
 
 func NewGetLeagueRequest() *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, "/League", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
 	return req
 }
 

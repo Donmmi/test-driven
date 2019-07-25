@@ -3,12 +3,11 @@ package poker_test
 import (
 	"testing"
 	"strings"
-	"bufio"
 	"donmmi/test-driven/http"
 )
 
 func Test_CLI(t *testing.T) {
-	in := bufio.NewScanner(strings.NewReader(`pepper wins`))
+	in := strings.NewReader(`pepper wins`)
 	playerStore := &poker.StubPlayerStore{}
 	cli := poker.NewCLI(playerStore, in)
 	cli.PlayPoker()
